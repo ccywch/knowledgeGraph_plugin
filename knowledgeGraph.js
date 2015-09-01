@@ -66,7 +66,7 @@ function gmMain () {
         //Insert tagWiki into the Google search pape
         var wikiPosition = document.createElement("p");
         wikiPosition.id = "wiki";  
-        wikiPosition.appendChild(document.createTextNode(JSON.parse(wikiResult)["items"][0]["excerpt"]));
+        wikiPosition.appendChild(document.createTextNode(jQuery('<p>' + JSON.parse(wikiResult)["items"][0]["excerpt"] + '</p>').text()));    //jQuery(wiki).text() is to convert HTML to string.
         wikiPosition.setAttribute("style", "font-size:16px;position:absolute;top:"+baseHeight+"px;left:700px;width: 500px;");
         document.body.appendChild(wikiPosition);
         var wikiHeight = $('#wiki').height();                   //the height of wiki paragraph
