@@ -24,7 +24,7 @@ var pageURLCheckTimer       = setInterval (
             gmMain ();
         }
     }
-    , 111
+    , 200
 );
 
 function gmMain () {
@@ -41,60 +41,66 @@ function gmMain () {
       checkLink.parentNode.removeChild(checkLink);
     }
   
-    var tag = document.getElementById("lst-ib").value.toLowerCase().replace(" ","-");                //Get the content in the search bar as the tag (lowercase and replace blank)
-
-    //Get tagWiki content
-    var wikiUrl = "https://api.stackexchange.com/2.2/tags/"+tag.replace("#","%23")+"/wikis?site=stackoverflow";
-    var xmlHttp = new XMLHttpRequest();
-    xmlHttp.open( "GET", wikiUrl, false );
-    xmlHttp.send();
-    var wikiResult = xmlHttp.responseText;
-    
-    
-    //Get graph content
-    var graphURL = "https://graphofknowledge.appspot.com/tagidjson/"+tag.replace("#","+++");
-    xmlHttp.open( "GET", graphURL, false );
-    xmlHttp.send();
-    var graphResult = xmlHttp.responseText;
- 
-   
-    if (JSON.parse(wikiResult)["items"].length != 0 && graphResult != ""  )  //no wiki data or no graph data
+    var input = document.getElementById("lst-ib").value.toLowerCase();                //Get the content in the search bar as the tag (lowercase and replace blank)
+    if (input.split(" ").length<6)                                                    // no more than 5 spaces in the input
     {
+        var xmlHttp = new XMLHttpRequest();
         
-        var baseHeight = 120 + $('#rhs').height();          //Align our answer panle behind Google's direct answer or ads. Google's navigation bar height = 120
+        //Get graph content
+        console.log(input.replace(/#/g,"+++").replace(/ /g,"&&"));                    //"replace" method can only replace the first occurrence, so we use regex here
+        xmlHttp.open( "GET", "https://graphofknowledge.appspot.com/tagidjson/"+input.replace("#","+++").replace(/ /g,"&&"), false );
+        xmlHttp.send();
+        var tag = xmlHttp.responseText.split("&&")[0];                         //the tag
+        var graphResult = xmlHttp.responseText.split("&&")[1];                 //the kg graph
         
-        //Insert tagWiki into the Google search pape
-        var wikiPosition = document.createElement("p");
-        wikiPosition.id = "wiki";  
-        wikiPosition.appendChild(document.createTextNode(jQuery('<p>' + JSON.parse(wikiResult)["items"][0]["excerpt"] + '</p>').text()));    //jQuery(wiki).text() is to convert HTML to string.
-        wikiPosition.setAttribute("style", "font-size:16px;position:absolute;top:"+baseHeight+"px;left:700px;width: 500px;");
-        document.body.appendChild(wikiPosition);
-        var wikiHeight = $('#wiki').height();                   //the height of wiki paragraph
+        
+        
+        //Get tagWiki content
+        var wikiUrl = "https://api.stackexchange.com/2.2/tags/"+tag.replace(/#/g,"%23")+"/wikis?site=stackoverflow";
+        xmlHttp.open( "GET", wikiUrl, false );
+        xmlHttp.send();
+        var wikiResult = xmlHttp.responseText;
 
-        //Insert a link to our own website
-        var linkPosition = document.createElement("p");
-        linkURL = "http://graphofknowledge.appspot.com/tagid/" +tag.replace("#","+++");
-        linkPosition.innerHTML = "Refer to <a href = \""+linkURL+"\">" + linkURL + "</a>" ;
-        //linkPosition.appendChild();
-        linkPosition.setAttribute("style", "font-size:15px;position:absolute;top:"+(baseHeight+wikiHeight+10)+"px;left:700px;");
-        linkPosition.id = "link";
-        //buttonPosition.onclick = redirectToUrl(tag.replace("#","+++"));
-        document.body.appendChild(linkPosition);
 
-        //Insert the knowledge graph to the Google search page
-        var graphPosition=document.createElement("svg");
-        graphPosition.id = "graph";
-        graphPosition.setAttribute("style", "font-size:18px;position:absolute;top:"+(baseHeight+wikiHeight+70)+"px;left:700px;");
-        console.log("begin", document.getElementById("lst-ib").value);
-        var graphContent =  JSON.parse(graphResult);
-        document.body.appendChild(graphPosition);
-        var edgeDistance = 80*graphContent["links"].length/graphContent["nodes"].length;      //the edge distance depends on the ratio of edge and node number
-        console.log(graphContent["links"].length, graphContent["nodes"].length, edgeDistance);
-        knowledgeGraph(graphContent, 500, 500, 0, edgeDistance, "#graph");
+
+        if (JSON.parse(wikiResult)["items"].length != 0 && graphResult != ""  )  //no wiki data or no graph data
+        {
+
+            var baseHeight = 120 + $('#rhs').height();          //Align our answer panle behind Google's direct answer or ads. Google's navigation bar height = 120
+
+            //Insert tagWiki into the Google search pape
+            var wikiPosition = document.createElement("p");
+            wikiPosition.id = "wiki";  
+            wikiPosition.appendChild(document.createTextNode(jQuery('<p>' + JSON.parse(wikiResult)["items"][0]["excerpt"] + '</p>').text()));    //jQuery(wiki).text() is to convert HTML to string.
+            wikiPosition.setAttribute("style", "font-size:16px;position:absolute;top:"+baseHeight+"px;left:700px;width: 500px;");
+            document.body.appendChild(wikiPosition);
+            var wikiHeight = $('#wiki').height();                   //the height of wiki paragraph
+
+            //Insert a link to our own website
+            var linkPosition = document.createElement("p");
+            linkURL = "https://graphofknowledge.appspot.com/tagid/" +tag.replace(/#/g,"+++");
+            linkPosition.innerHTML = "Refer to <a href = \""+linkURL+"\">" + linkURL + "</a>" ;
+            //linkPosition.appendChild();
+            linkPosition.setAttribute("style", "font-size:15px;position:absolute;top:"+(baseHeight+wikiHeight+10)+"px;left:700px;");
+            linkPosition.id = "link";
+            //buttonPosition.onclick = redirectToUrl(tag.replace("#","+++"));
+            document.body.appendChild(linkPosition);
+
+            //Insert the knowledge graph to the Google search page
+            var graphPosition=document.createElement("svg");
+            graphPosition.id = "graph";
+            graphPosition.setAttribute("style", "font-size:18px;position:absolute;top:"+(baseHeight+wikiHeight+70)+"px;left:700px;");
+            //console.log("begin", document.getElementById("lst-ib").value);
+            var graphContent =  JSON.parse(graphResult);
+            document.body.appendChild(graphPosition);
+            var edgeDistance = 80*graphContent["links"].length/graphContent["nodes"].length;      //the edge distance depends on the ratio of edge and node number
+            //console.log(graphContent["links"].length, graphContent["nodes"].length, edgeDistance);
+            knowledgeGraph(graphContent, 500, 500, 0, edgeDistance, "#graph");
+        }
     }
 }
 
-//Only for debugging
+//Only for debugging if we get the input
 function showAlert()
 {
     alert(document.getElementById("lst-ib").value);
@@ -124,6 +130,8 @@ var svg = d3.select(position).append("svg")
     .attr("height", height + margin.top + margin.bottom)
 	.attr("border",border)
 	;
+    
+
 
 //add borther to the svg
 var borderPath = svg.append("rect")
@@ -166,7 +174,9 @@ var json = featureContent;
 	    .enter().append("g")
       .attr("class", "node")
       .call(force.drag)
-	    .on('mouseover', connectedNodes)
+	    //.on('mousedown', tip.show)  
+      //.on('mouseup', tip.hide)  //.on('mouseleave', tip.hide)
+      .on('mouseover', connectedNodes)
 	    .on('mouseout', allNodes)
 	    .on('dblclick', reDirect);
 
@@ -179,7 +189,7 @@ var json = featureContent;
       .attr("dy", ".35em")
       .text(function(d) { return d.name })
       .style("font-size",function(d) { return d.degree*2+'px' })
-	  .style("stroke", "gray");  
+	    .style("stroke", "gray");  
 	  
 	  
 	  
@@ -219,7 +229,7 @@ var json = featureContent;
     return linkedByIndex[a.index + "," + b.index];
   }
   
-  function connectedNodes() {
+    function connectedNodes() {
         //Reduce the opacity of all but the neighbouring nodes
         d = d3.select(this).node().__data__;
         //console.log(d.name);
@@ -230,7 +240,9 @@ var json = featureContent;
             return d.index==o.source.index | d.index==o.target.index ? 1 : 0.1;
         });
           
-}
+    }
+   
+     
   function allNodes()
   { node.style("opacity", 1);
     link.style("opacity", 1);}
