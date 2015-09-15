@@ -44,26 +44,20 @@ function gmMain () {
     var input = document.getElementById("lst-ib").value.toLowerCase();                //Get the content in the search bar as the tag (lowercase and replace blank)
     if (input.split(" ").length<6)                                                    // no more than 5 spaces in the input
     {
-        var xmlHttp = new XMLHttpRequest();
-        
+       
         //Get graph content
         console.log(input.replace(/#/g,"+++").replace(/ /g,"&&"));                    //"replace" method can only replace the first occurrence, so we use regex here
-        xmlHttp.open( "GET", "https://graphofknowledge.appspot.com/tagidjson/"+input.replace("#","+++").replace(/ /g,"&&"), false );
-        xmlHttp.send();
-        var tag = xmlHttp.responseText.split("&&")[0];                         //the tag
-        var graphResult = xmlHttp.responseText.split("&&")[1];                 //the kg graph
+        var result = $.ajax({type: "GET", url: "https://graphofknowledge.appspot.com/tagidjson/"+input.replace("#","+++").replace(/ /g,"&&"), async: false}).responseText;
+        var tag = result.split("&&")[0];                         //the tag
+        var graphResult = result.split("&&")[1];                 //the kg
         
         
-        
-        //Get tagWiki content
-        var wikiUrl = "https://api.stackexchange.com/2.2/tags/"+tag.replace(/#/g,"%23")+"/wikis?site=stackoverflow";
-        xmlHttp.open( "GET", wikiUrl, false );
-        xmlHttp.send();
-        var wikiResult = xmlHttp.responseText;
+       //Get tagWiki content
+        var wikiResult = JSON.parse($.ajax({type: "GET", url: "https://api.stackexchange.com/2.2/tags/"+tag.split("_").pop().replace(/#/g,"%23")+"/wikis?site=stackoverflow", async: false}).responseText);
 
 
 
-        if (JSON.parse(wikiResult)["items"].length != 0 && graphResult != ""  )  //no wiki data or no graph data
+        if (wikiResult["items"].length != 0 && graphResult != ""  )  //no wiki data or no graph data
         {
 
             var baseHeight = 120 + $('#rhs').height();          //Align our answer panle behind Google's direct answer or ads. Google's navigation bar height = 120
@@ -71,14 +65,19 @@ function gmMain () {
             //Insert tagWiki into the Google search pape
             var wikiPosition = document.createElement("p");
             wikiPosition.id = "wiki";  
-            wikiPosition.appendChild(document.createTextNode(jQuery('<p>' + JSON.parse(wikiResult)["items"][0]["excerpt"] + '</p>').text()));    //jQuery(wiki).text() is to convert HTML to string.
+            wikiPosition.appendChild(document.createTextNode(jQuery('<p>' + wikiResult["items"][0]["excerpt"] + '</p>').text()));    //jQuery(wiki).text() is to convert HTML to string.
             wikiPosition.setAttribute("style", "font-size:16px;position:absolute;top:"+baseHeight+"px;left:700px;width: 500px;");
             document.body.appendChild(wikiPosition);
             var wikiHeight = $('#wiki').height();                   //the height of wiki paragraph
 
             //Insert a link to our own website
             var linkPosition = document.createElement("p");
-            linkURL = "https://graphofknowledge.appspot.com/tagid/" +tag.replace(/#/g,"+++");
+            linkURL = "";
+            //Direct to techGraph or techTask pages
+            if (tag.indexOf("_") == -1)
+               {linkURL = "https://graphofknowledge.appspot.com/tagid/" +tag.replace(/#/g,"+++");}
+            else
+               {linkURL = "https://graphofknowledge.appspot.com/techtask/" +tag.replace(/#/g,"+++").replace("_","&");}
             linkPosition.innerHTML = "Refer to <a href = \""+linkURL+"\">" + linkURL + "</a>" ;
             //linkPosition.appendChild();
             linkPosition.setAttribute("style", "font-size:15px;position:absolute;top:"+(baseHeight+wikiHeight+10)+"px;left:700px;");
@@ -99,13 +98,6 @@ function gmMain () {
         }
     }
 }
-
-//Only for debugging if we get the input
-function showAlert()
-{
-    alert(document.getElementById("lst-ib").value);
-}
-
 
 
 //Draw knowledge graph
