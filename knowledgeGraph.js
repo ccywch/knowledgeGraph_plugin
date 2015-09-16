@@ -8,9 +8,9 @@
 // @grant       none
 // ==/UserScript==
 
+var kg_cssSrc = GM_getResourceText ("kg_css");     //add external css file for tip event       
+GM_addStyle (kg_cssSrc);
 
-//The alternative ones is to use jquery waitForKeyElements https://gist.github.com/raw/2625891/waitForKeyElements.js
-//The code is modified from one answer in http://stackoverflow.com/questions/18989345/how-do-i-reload-a-greasemonkey-script-when-ajax-changes-the-url-without-reloadin
 var fireOnHashChangesToo    = true;
 var pageURLCheckTimer       = setInterval (
     function () {
@@ -142,11 +142,21 @@ var force = d3.layout.force()
 	  .linkDistance(distance)
     .size([width, height]);
 
-	
+//Set up tooltip
+var tip = d3.tip()
+    .attr('class', 'd3-tip')
+    .offset([-3, 0])
+    .html(function (d) {
+	var xmlHttp = new XMLHttpRequest();
+	xmlHttp.open( "GET", "https://api.stackexchange.com/2.2/tags/"+d.name.replace("#","%23")+"/wikis?site=stackoverflow&key=IQXyZwA1rHRM4rguoGZ)xQ((", false );
+    xmlHttp.send();
+	return  JSON.parse(xmlHttp.responseText)["items"][0]["excerpt"].split(". ")[0] + ".</span>";
+})
+svg.call(tip);	
+    
+    
 var json = featureContent;
-	
-	
-  //json = JSON.parse(jsondata)
+
 	
   force
 	  //.alpha(10)
@@ -166,11 +176,12 @@ var json = featureContent;
 	    .enter().append("g")
       .attr("class", "node")
       .call(force.drag)
-	    //.on('mousedown', tip.show)  
-      //.on('mouseup', tip.hide)  //.on('mouseleave', tip.hide)
-      .on('mouseover', connectedNodes)
+	    .on('dblclick', reDirect)
+	    .on('mouseover', connectedNodes)
 	    .on('mouseout', allNodes)
-	    .on('dblclick', reDirect);
+	    .on('contextmenu', function(d){d3.event.preventDefault();tip.show(d);}) 
+      .on('mouseleave', tip.hide) 
+	  ;
 
   node.append("circle")
     .attr("r", function(d) { return d.degree;})
