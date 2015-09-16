@@ -9,6 +9,7 @@ Screenshot can be seen below:
 2. Functions:
 (1). The script can detect technology terms (e.g., github, data visualization, machine learning) in your Google search. If the searched technology is in our structured knowledge base,  the script renders a definition of the technology (extracted from Stack Overflow TagWiki) and a graph overview of the correlated technologies.
 (2). The script also provide an access to our web application (http://graphofknowledge.appspot.com/) that can give you more detailed information about your search technologies (e.g., technology trend, comparison of alternative technologies).
+(3). You can right-click the node for brief definition or double-click for more details.
 
 3. Usage:
 (1). Install GreaseMonkey (Firefox) and TamperMonkey (Chrome) in  your web browser.
