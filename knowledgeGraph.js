@@ -3,9 +3,12 @@
 // @namespace   Chen Chunyang
 // @require     http://d3js.org/d3.v3.min.js
 // @require     https://code.jquery.com/jquery-2.1.4.min.js
+// @require     http://labratrevenge.com/d3-tip/javascripts/d3.tip.v0.6.3.js
+// @resource kg_css  https://graphofknowledge.appspot.com/dist/plugin.css
 // @include     https://www.google.com*
-// @version     1
-// @grant       none
+// @version     3.0
+// @grant    GM_addStyle
+// @grant    GM_getResourceText
 // ==/UserScript==
 
 var kg_cssSrc = GM_getResourceText ("kg_css");     //add external css file for tip event       
