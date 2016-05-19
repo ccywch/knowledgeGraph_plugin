@@ -20,3 +20,5 @@ Screenshot can be seen below:
 If you have any problem, do not hesitate to contact me at chen0966|e.ntu.edu.sg. (change "|" to "@").
 
 Thanks and enjoy the journey.
+
+[![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/ccywch/knowledgegraph_plugin/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
